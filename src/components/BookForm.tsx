@@ -44,16 +44,16 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto fantasy-dialog">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-amber-200">
+          <DialogTitle className="flex items-center gap-2 forest-strong">
             <BookOpen className="w-6 h-6" />
             {book ? 'Edit Tome' : 'Add New Tome'}
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-emerald-200" />
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <Label htmlFor="title" className="text-amber-100">Book Title</Label>
+              <Label htmlFor="title" className="forest-muted">Book Title</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -64,7 +64,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="publisher" className="text-amber-100">Publisher Name</Label>
+              <Label htmlFor="publisher" className="forest-muted">Publisher Name</Label>
               <Input
                 id="publisher"
                 value={formData.publisher}
@@ -75,7 +75,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="quantity" className="text-amber-100">Quantity</Label>
+              <Label htmlFor="quantity" className="forest-muted">Quantity</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -88,7 +88,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="preOrderDate" className="text-amber-100">Pre-order Start Date</Label>
+              <Label htmlFor="preOrderDate" className="forest-muted">Pre-order Start Date</Label>
               <Input
                 id="preOrderDate"
                 type="date"
@@ -100,7 +100,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="deliveryDate" className="text-amber-100">Estimated Delivery Date</Label>
+              <Label htmlFor="deliveryDate" className="forest-muted">Estimated Delivery Date</Label>
               <Input
                 id="deliveryDate"
                 type="date"
@@ -112,7 +112,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div className="col-span-2">
-              <Label htmlFor="address" className="text-amber-100">Delivery Address</Label>
+              <Label htmlFor="address" className="forest-muted">Delivery Address</Label>
               <Input
                 id="address"
                 value={formData.deliveryAddress}
@@ -123,7 +123,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="totalPrice" className="text-amber-100">Total Price (including delivery)</Label>
+              <Label htmlFor="totalPrice" className="forest-muted">Total Price (including delivery)</Label>
               <Input
                 id="totalPrice"
                 type="number"
@@ -137,7 +137,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="soldFor" className="text-amber-100">Sold For (price)</Label>
+              <Label htmlFor="soldFor" className="forest-muted">Sold For (price)</Label>
               <Input
                 id="soldFor"
                 type="number"
@@ -150,7 +150,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="delivered" className="text-amber-100">Delivered Status</Label>
+              <Label htmlFor="delivered" className="forest-muted">Delivered Status</Label>
               <Select
                 value={formData.delivered}
                 onValueChange={(value: DeliveryStatus) => setFormData({ ...formData, delivered: value })}
@@ -167,7 +167,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="forSale" className="text-amber-100">For Sale</Label>
+              <Label htmlFor="forSale" className="forest-muted">For Sale</Label>
               <Select
                 value={formData.forSale}
                 onValueChange={(value: ForSaleStatus) => setFormData({ ...formData, forSale: value })}
@@ -189,7 +189,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 checked={formData.ordered}
                 onCheckedChange={(checked) => setFormData({ ...formData, ordered: checked })}
               />
-              <Label htmlFor="ordered" className="text-amber-100">Ordered</Label>
+              <Label htmlFor="ordered" className="forest-muted">Ordered</Label>
             </div>
           </div>
 

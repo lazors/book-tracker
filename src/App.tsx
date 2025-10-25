@@ -57,19 +57,19 @@ function App() {
   const deliveredCount = books.filter(b => b.delivered === 'Yes').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen forest-gradient">
       <div className="fantasy-texture"></div>
       
       <div className="relative z-10">
         {/* Header */}
-        <header className="border-b border-amber-900/30 bg-slate-950/40 backdrop-blur-sm">
+        <header className="forest-header">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-amber-400" />
-                <h1 className="text-amber-200 flex items-center gap-2">
+                <BookOpen className="w-8 h-8 text-emerald-300" />
+                <h1 className="forest-strong flex items-center gap-2">
                   Fantasy Tome Tracker
-                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <Sparkles className="w-5 h-5 text-emerald-200" />
                 </h1>
               </div>
               <Button
@@ -84,27 +84,27 @@ function App() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               <div className="fantasy-stat-card">
-                <div className="text-amber-400/70">Total Tomes</div>
-                <div className="text-amber-100 mt-1">{books.length}</div>
+                <div className="forest-stat-label">Total Tomes</div>
+                <div className="forest-stat-value">{books.length}</div>
               </div>
               <div className="fantasy-stat-card">
-                <div className="text-amber-400/70">Ordered</div>
-                <div className="text-amber-100 mt-1">{orderedCount}</div>
+                <div className="forest-stat-label">Ordered</div>
+                <div className="forest-stat-value">{orderedCount}</div>
               </div>
               <div className="fantasy-stat-card">
-                <div className="text-amber-400/70">Delivered</div>
-                <div className="text-amber-100 mt-1">{deliveredCount}</div>
+                <div className="forest-stat-label">Delivered</div>
+                <div className="forest-stat-value">{deliveredCount}</div>
               </div>
               <div className="fantasy-stat-card">
-                <div className="text-amber-400/70">Total Value</div>
-                <div className="text-amber-100 mt-1">${totalValue.toFixed(2)}</div>
+                <div className="forest-stat-label">Total Value</div>
+                <div className="forest-stat-value">${totalValue.toFixed(2)}</div>
               </div>
             </div>
 
             {totalSold > 0 && (
-              <div className="mt-4 fantasy-stat-card border-emerald-800/30">
-                <div className="text-emerald-400/70">Total Sales Revenue</div>
-                <div className="text-emerald-200 mt-1">${totalSold.toFixed(2)}</div>
+              <div className="mt-4 fantasy-stat-card">
+                <div className="forest-stat-label">Total Sales Revenue</div>
+                <div className="forest-stat-value">${totalSold.toFixed(2)}</div>
               </div>
             )}
           </div>
