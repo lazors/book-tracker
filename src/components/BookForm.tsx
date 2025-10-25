@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Book, DeliveryStatus, ForSaleStatus } from '../types/book';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -12,7 +12,7 @@ interface BookFormProps {
   book?: Book;
   open: boolean;
   onClose: () => void;
-  onSave: (book: Omit<Book, 'id'> | Book) => void;
+  onSave: (book: Omit<Book, 'id'> | Book) => void | Promise<void>;
 }
 
 export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
@@ -30,14 +30,50 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     soldFor: book?.soldFor || null,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
     if (book) {
-      onSave({ ...formData, id: book.id });
+      setFormData({
+        title: book.title,
+        publisher: book.publisher,
+        preOrderStartDate: book.preOrderStartDate,
+        estimatedDeliveryDate: book.estimatedDeliveryDate,
+        deliveryAddress: book.deliveryAddress,
+        ordered: book.ordered,
+        delivered: book.delivered,
+        totalPrice: book.totalPrice,
+        quantity: book.quantity,
+        forSale: book.forSale,
+        soldFor: book.soldFor,
+      });
     } else {
-      onSave(formData);
+      setFormData({
+        title: '',
+        publisher: '',
+        preOrderStartDate: '',
+        estimatedDeliveryDate: '',
+        deliveryAddress: '',
+        ordered: false,
+        delivered: 'No',
+        totalPrice: 0,
+        quantity: 1,
+        forSale: 'No',
+        soldFor: null,
+      });
     }
-    onClose();
+  }, [book, open]);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      if (book) {
+        await onSave({ ...formData, id: book.id });
+      } else {
+        await onSave(formData);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Failed to save tome details', error);
+    }
   };
 
   return (
@@ -57,7 +93,9 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
                 className="fantasy-input"
               />
@@ -68,7 +106,9 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
               <Input
                 id="publisher"
                 value={formData.publisher}
-                onChange={(e) => setFormData({ ...formData, publisher: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, publisher: e.target.value })
+                }
                 required
                 className="fantasy-input"
               />
@@ -81,7 +121,12 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 type="number"
                 min="1"
                 value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    quantity: parseInt(e.target.value, 10) || 1,
+                  })
+                }
                 required
                 className="fantasy-input"
               />
@@ -93,7 +138,9 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 id="preOrderDate"
                 type="date"
                 value={formData.preOrderStartDate}
-                onChange={(e) => setFormData({ ...formData, preOrderStartDate: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, preOrderStartDate: e.target.value })
+                }
                 required
                 className="fantasy-input"
               />
@@ -105,7 +152,12 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 id="deliveryDate"
                 type="date"
                 value={formData.estimatedDeliveryDate}
-                onChange={(e) => setFormData({ ...formData, estimatedDeliveryDate: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    estimatedDeliveryDate: e.target.value,
+                  })
+                }
                 required
                 className="fantasy-input"
               />
@@ -116,7 +168,9 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
               <Input
                 id="address"
                 value={formData.deliveryAddress}
-                onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, deliveryAddress: e.target.value })
+                }
                 required
                 className="fantasy-input"
               />
@@ -130,7 +184,12 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 min="0"
                 step="0.01"
                 value={formData.totalPrice}
-                onChange={(e) => setFormData({ ...formData, totalPrice: parseFloat(e.target.value) || 0 })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    totalPrice: parseFloat(e.target.value) || 0,
+                  })
+                }
                 required
                 className="fantasy-input"
               />
@@ -144,7 +203,12 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 min="0"
                 step="0.01"
                 value={formData.soldFor || ''}
-                onChange={(e) => setFormData({ ...formData, soldFor: e.target.value ? parseFloat(e.target.value) : null })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    soldFor: e.target.value ? parseFloat(e.target.value) : null,
+                  })
+                }
                 className="fantasy-input"
               />
             </div>

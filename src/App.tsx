@@ -1,36 +1,79 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Book } from './types/book';
 import { BookForm } from './components/BookForm';
 import { BookList } from './components/BookList';
 import { Button } from './components/ui/button';
 import { BookOpen, Plus, Sparkles } from 'lucide-react';
 import { Toaster } from './components/ui/sonner';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
+import { loadBooks, removeBook, upsertBook } from './lib/indexed-db';
 
 function App() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | undefined>(undefined);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
-  const handleSave = (bookData: Omit<Book, 'id'> | Book) => {
-    if ('id' in bookData) {
-      // Editing existing book
-      setBooks(books.map(b => b.id === bookData.id ? bookData as Book : b));
-      toast.success('Tome updated successfully!', {
-        description: `"${bookData.title}" has been updated in your collection.`
+  useEffect(() => {
+    let isMounted = true;
+
+    loadBooks()
+      .then((storedBooks) => {
+        if (isMounted) {
+          setBooks(storedBooks);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load tomes from IndexedDB', error);
+        if (isMounted) {
+          toast.error('Could not load saved tomes', {
+            description: 'Starting with a fresh collection instead.',
+          });
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsBootstrapping(false);
+        }
       });
-    } else {
-      // Adding new book
-      const newBook: Book = {
-        ...bookData,
-        id: crypto.randomUUID(),
-      };
-      setBooks([...books, newBook]);
-      toast.success('New tome added!', {
-        description: `"${bookData.title}" has been added to your collection.`
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleSave = async (bookData: Omit<Book, 'id'> | Book) => {
+    try {
+      if ('id' in bookData) {
+        const updatedBook = bookData as Book;
+        await upsertBook(updatedBook);
+        setBooks((current: Book[]) =>
+          current.map((existing: Book) =>
+            existing.id === updatedBook.id ? updatedBook : existing,
+          ),
+        );
+        toast.success('Tome updated successfully!', {
+          description: `"${updatedBook.title}" has been updated in your collection.`,
+        });
+      } else {
+        const newBook: Book = {
+          ...bookData,
+          id: crypto.randomUUID(),
+        };
+        await upsertBook(newBook);
+  setBooks((current: Book[]) => [...current, newBook]);
+        toast.success('New tome added!', {
+          description: `"${newBook.title}" has been added to your collection.`,
+        });
+      }
+      setEditingBook(undefined);
+    } catch (error) {
+      console.error('Failed to persist tome to IndexedDB', error);
+      toast.error('Could not save that tome', {
+        description: 'Please try again.',
       });
+      throw error;
     }
-    setEditingBook(undefined);
   };
 
   const handleEdit = (book: Book) => {
@@ -39,11 +82,22 @@ function App() {
   };
 
   const handleDelete = (id: string) => {
-    const book = books.find(b => b.id === id);
-    setBooks(books.filter(b => b.id !== id));
-    toast.success('Tome removed', {
-      description: `"${book?.title}" has been removed from your collection.`
-    });
+  const book = books.find((entry: Book) => entry.id === id);
+
+    void (async () => {
+      try {
+        await removeBook(id);
+  setBooks((current: Book[]) => current.filter((entry: Book) => entry.id !== id));
+        toast.success('Tome removed', {
+          description: `"${book?.title ?? 'The tome'}" has been removed from your collection.`,
+        });
+      } catch (error) {
+        console.error('Failed to remove tome from IndexedDB', error);
+        toast.error('Could not remove that tome', {
+          description: 'Please try again.',
+        });
+      }
+    })();
   };
 
   const handleCloseForm = () => {
@@ -51,10 +105,16 @@ function App() {
     setEditingBook(undefined);
   };
 
-  const totalValue = books.reduce((sum, book) => sum + book.totalPrice, 0);
-  const totalSold = books.reduce((sum, book) => sum + (book.soldFor || 0), 0);
-  const orderedCount = books.filter(b => b.ordered).length;
-  const deliveredCount = books.filter(b => b.delivered === 'Yes').length;
+  const totalValue = books.reduce<number>(
+    (sum: number, book: Book) => sum + book.totalPrice,
+    0,
+  );
+  const totalSold = books.reduce<number>(
+    (sum: number, book: Book) => sum + (book.soldFor || 0),
+    0,
+  );
+  const orderedCount = books.filter((book: Book) => book.ordered).length;
+  const deliveredCount = books.filter((book: Book) => book.delivered === 'Yes').length;
 
   return (
     <div className="min-h-screen forest-gradient">
@@ -112,7 +172,13 @@ function App() {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
-          <BookList books={books} onEdit={handleEdit} onDelete={handleDelete} />
+          {isBootstrapping ? (
+            <div className="text-center py-16 forest-muted">
+              Awakening your library...
+            </div>
+          ) : (
+            <BookList books={books} onEdit={handleEdit} onDelete={handleDelete} />
+          )}
         </main>
 
         {/* Form Dialog */}
