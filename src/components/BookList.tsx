@@ -91,11 +91,6 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
               <div className="text-sm">{formatDate(book.estimatedDeliveryDate)}</div>
             </div>
 
-            <div>
-              <div className="forest-muted mb-1">Address:</div>
-              <div className="text-sm line-clamp-2">{book.deliveryAddress}</div>
-            </div>
-
             <div className="flex items-center gap-2 pt-2">
               <span className="forest-muted">Ordered:</span>
               <Badge variant="outline" className={book.ordered ? 'bg-green-700 border-green-500 text-green-100' : 'bg-slate-700 border-slate-500 text-slate-200'}>

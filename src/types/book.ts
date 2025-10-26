@@ -7,7 +7,6 @@ export interface Book {
   publisher: string;
   preOrderStartDate: string;
   estimatedDeliveryDate: string;
-  deliveryAddress: string;
   ordered: boolean;
   delivered: DeliveryStatus;
   totalPrice: number;

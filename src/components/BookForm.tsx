@@ -21,7 +21,6 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     publisher: book?.publisher || '',
     preOrderStartDate: book?.preOrderStartDate || '',
     estimatedDeliveryDate: book?.estimatedDeliveryDate || '',
-    deliveryAddress: book?.deliveryAddress || '',
     ordered: book?.ordered || false,
     delivered: book?.delivered || 'No',
     totalPrice: book?.totalPrice || 0,
@@ -37,7 +36,6 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
         publisher: book.publisher,
         preOrderStartDate: book.preOrderStartDate,
         estimatedDeliveryDate: book.estimatedDeliveryDate,
-        deliveryAddress: book.deliveryAddress,
         ordered: book.ordered,
         delivered: book.delivered,
         totalPrice: book.totalPrice,
@@ -51,7 +49,6 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
         publisher: '',
         preOrderStartDate: '',
         estimatedDeliveryDate: '',
-        deliveryAddress: '',
         ordered: false,
         delivered: 'No',
         totalPrice: 0,
@@ -157,19 +154,6 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                     ...formData,
                     estimatedDeliveryDate: e.target.value,
                   })
-                }
-                required
-                className="fantasy-input"
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="address" className="forest-muted">Delivery Address</Label>
-              <Input
-                id="address"
-                value={formData.deliveryAddress}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, deliveryAddress: e.target.value })
                 }
                 required
                 className="fantasy-input"
