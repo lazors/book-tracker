@@ -127,7 +127,7 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
 
             <div className="flex items-center gap-2">
               <span className="forest-muted">Author:</span>
-              <span>{book.author}</span>
+              <span>{book.author || 'Unknown'}</span>
             </div>
 
             <div className="flex items-center gap-2">

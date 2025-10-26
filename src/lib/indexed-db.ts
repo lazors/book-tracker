@@ -1,7 +1,7 @@
 import { Book } from "../types/book";
 
 const DB_NAME = "book-tracker";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "books";
 
 type StoreMode = IDBTransactionMode;
@@ -20,15 +20,23 @@ function openDatabase(): Promise<IDBDatabase> {
       reject(request.error ?? new Error("Failed to open IndexedDB."));
     };
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const db = request.result;
+      const oldVersion = (event as IDBVersionChangeEvent).oldVersion;
+
+      let store: IDBObjectStore;
+
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-        return;
+        store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      } else {
+        const upgradeTransaction = request.transaction;
+        if (!upgradeTransaction) {
+          throw new Error("IndexedDB upgrade transaction missing.");
+        }
+        store = upgradeTransaction.objectStore(STORE_NAME);
       }
 
-      const store = request.transaction?.objectStore(STORE_NAME);
-      if (store && !store.indexNames.contains("author")) {
+      if (oldVersion < 2 && !store.indexNames.contains("author")) {
         store.createIndex("author", "author", { unique: false });
       }
     };
@@ -106,7 +114,15 @@ export async function loadBooks(): Promise<Book[]> {
     "readonly",
     (store) => store.getAll() as IDBRequest<Book[]>,
   );
-  return Array.isArray(records) ? records : [];
+
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records.map((entry) => ({
+    ...entry,
+    author: typeof entry.author === "string" ? entry.author : "",
+  }));
 }
 
 export async function upsertBook(book: Book): Promise<void> {
