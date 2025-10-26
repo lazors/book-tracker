@@ -18,6 +18,7 @@ interface BookFormProps {
 export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
   const [formData, setFormData] = useState<Omit<Book, 'id'>>({
     title: book?.title || '',
+    author: book?.author || '',
     publisher: book?.publisher || '',
     preOrderStartDate: book?.preOrderStartDate || '',
     estimatedDeliveryDate: book?.estimatedDeliveryDate || '',
@@ -33,6 +34,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     if (book) {
       setFormData({
         title: book.title,
+        author: book.author,
         publisher: book.publisher,
         preOrderStartDate: book.preOrderStartDate,
         estimatedDeliveryDate: book.estimatedDeliveryDate,
@@ -46,6 +48,7 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     } else {
       setFormData({
         title: '',
+  author: '',
         publisher: '',
         preOrderStartDate: '',
         estimatedDeliveryDate: '',
@@ -92,6 +95,19 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                 value={formData.title}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, title: e.target.value })
+                }
+                required
+                className="fantasy-input"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="author" className="forest-muted">Author</Label>
+              <Input
+                id="author"
+                value={formData.author}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, author: e.target.value })
                 }
                 required
                 className="fantasy-input"

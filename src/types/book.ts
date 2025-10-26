@@ -4,6 +4,7 @@ export type ForSaleStatus = 'No' | 'Maybe' | 'Yes';
 export interface Book {
   id: string;
   title: string;
+  author: string;
   publisher: string;
   preOrderStartDate: string;
   estimatedDeliveryDate: string;

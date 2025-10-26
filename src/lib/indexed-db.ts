@@ -24,6 +24,12 @@ function openDatabase(): Promise<IDBDatabase> {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "id" });
+        return;
+      }
+
+      const store = request.transaction?.objectStore(STORE_NAME);
+      if (store && !store.indexNames.contains("author")) {
+        store.createIndex("author", "author", { unique: false });
       }
     };
 

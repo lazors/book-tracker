@@ -126,6 +126,11 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
             </div>
 
             <div className="flex items-center gap-2">
+              <span className="forest-muted">Author:</span>
+              <span>{book.author}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
               <span className="forest-muted">Quantity:</span>
               <Badge variant="outline" className="forest-badge">
                 {book.quantity}
