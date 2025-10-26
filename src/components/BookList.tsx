@@ -1,7 +1,10 @@
+import { useMemo, useState } from 'react';
 import { Book } from '../types/book';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Edit2, Trash2, Package, TrendingUp, Coins } from 'lucide-react';
 
 interface BookListProps {
@@ -10,7 +13,11 @@ interface BookListProps {
   onDelete: (id: string) => void;
 }
 
+type SortOption = 'default' | 'ordered' | 'delivered' | 'forSale';
+
 export function BookList({ books, onEdit, onDelete }: BookListProps) {
+  const [sortOption, setSortOption] = useState<SortOption>('default');
+
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -33,6 +40,34 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
     }
   };
 
+  const sortedBooks = useMemo(() => {
+    if (sortOption === 'default') {
+      return books;
+    }
+
+    const copied = [...books];
+
+    if (sortOption === 'ordered') {
+      return copied.sort((a, b) => Number(b.ordered) - Number(a.ordered));
+    }
+
+    if (sortOption === 'delivered') {
+      const priority: Record<Book['delivered'], number> = {
+        Yes: 2,
+        Shipped: 1,
+        No: 0,
+      };
+      return copied.sort((a, b) => priority[b.delivered] - priority[a.delivered]);
+    }
+
+    const salePriority: Record<Book['forSale'], number> = {
+      Yes: 2,
+      Maybe: 1,
+      No: 0,
+    };
+    return copied.sort((a, b) => salePriority[b.forSale] - salePriority[a.forSale]);
+  }, [books, sortOption]);
+
   if (books.length === 0) {
     return (
       <div className="text-center py-16 forest-muted">
@@ -43,8 +78,24 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {books.map((book) => (
+    <>
+      <div className="flex items-center justify-end mb-6 gap-3">
+        <Label htmlFor="sort-books" className="forest-muted text-sm">Sort by</Label>
+        <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
+          <SelectTrigger id="sort-books" className="fantasy-select min-w-[180px]">
+            <SelectValue placeholder="Sort status" />
+          </SelectTrigger>
+          <SelectContent className="fantasy-select-content">
+            <SelectItem value="default">Recently added</SelectItem>
+            <SelectItem value="ordered">Ordered status</SelectItem>
+            <SelectItem value="delivered">Delivery status</SelectItem>
+            <SelectItem value="forSale">For sale status</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedBooks.map((book) => (
         <Card key={book.id} className="fantasy-card p-6 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
           <div className="flex justify-between items-start mb-4">
             <h3 className="forest-strong pr-2">{book.title}</h3>
@@ -133,7 +184,8 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
             </div>
           </div>
         </Card>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
