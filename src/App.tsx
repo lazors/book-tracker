@@ -45,7 +45,12 @@ function App() {
   const handleSave = async (bookData: Omit<Book, 'id'> | Book) => {
     try {
       if ('id' in bookData) {
-        const updatedBook = bookData as Book;
+        const updatedBook: Book = {
+          ...bookData,
+          tags: Array.isArray(bookData.tags)
+            ? bookData.tags
+            : [],
+        } as Book;
         await upsertBook(updatedBook);
         setBooks((current: Book[]) =>
           current.map((existing: Book) =>
@@ -59,6 +64,9 @@ function App() {
         const newBook: Book = {
           ...bookData,
           id: crypto.randomUUID(),
+          tags: Array.isArray((bookData as Omit<Book, 'id'>).tags)
+            ? (bookData as Omit<Book, 'id'>).tags
+            : [],
         };
         await upsertBook(newBook);
   setBooks((current: Book[]) => [...current, newBook]);

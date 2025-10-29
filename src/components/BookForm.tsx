@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import { Book, DeliveryStatus, ForSaleStatus } from '../types/book';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,7 +6,8 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Switch } from './ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
-import { BookOpen, Sparkles } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { BookOpen, Sparkles, X } from 'lucide-react';
 
 interface BookFormProps {
   book?: Book;
@@ -27,8 +28,27 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
     totalPrice: book?.totalPrice || 0,
     quantity: book?.quantity || 1,
     forSale: book?.forSale || 'No',
-    soldFor: book?.soldFor || null,
+    soldFor: book?.soldFor ?? null,
+    tags: Array.isArray(book?.tags) ? (book?.tags as string[]) : [],
   });
+  const [tagInput, setTagInput] = useState('');
+
+  const displayTags = useMemo(() => {
+    const seen = new Set<string>();
+    const sanitized: string[] = [];
+
+    for (const raw of formData.tags || []) {
+      if (typeof raw !== 'string') continue;
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      sanitized.push(trimmed);
+    }
+
+    return sanitized;
+  }, [formData.tags]);
 
   useEffect(() => {
     if (book) {
@@ -44,6 +64,9 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
         quantity: book.quantity,
         forSale: book.forSale,
         soldFor: book.soldFor,
+        tags: Array.isArray(book.tags)
+          ? book.tags.filter((tag) => typeof tag === 'string' && tag.trim().length > 0)
+          : [],
       });
     } else {
       setFormData({
@@ -58,17 +81,59 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
         quantity: 1,
         forSale: 'No',
         soldFor: null,
+        tags: [],
       });
     }
+    setTagInput('');
   }, [book, open]);
+
+  const handleAddTag = (rawTag: string) => {
+    const tag = rawTag.trim();
+    if (tag.length === 0) {
+      return;
+    }
+
+    setFormData((current) => ({
+      ...current,
+      tags: Array.isArray(current.tags)
+        ? [
+            ...current.tags.filter(
+              (existing) => existing.trim().toLowerCase() !== tag.toLowerCase() && existing.trim().length > 0,
+            ),
+            tag,
+          ]
+        : [tag],
+    }));
+    setTagInput('');
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setFormData((current) => ({
+      ...current,
+      tags: (current.tags || []).filter(
+        (existing) => existing.trim().toLowerCase() !== tag.toLowerCase(),
+      ),
+    }));
+  };
+
+  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      handleAddTag(tagInput);
+    } else if (event.key === 'Backspace' && tagInput.length === 0 && displayTags.length > 0) {
+      event.preventDefault();
+      handleRemoveTag(displayTags[displayTags.length - 1]);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      const payload = { ...formData, tags: displayTags };
       if (book) {
-        await onSave({ ...formData, id: book.id });
+        await onSave({ ...payload, id: book.id });
       } else {
-        await onSave(formData);
+        await onSave(payload);
       }
       onClose();
     } catch (error) {
@@ -245,6 +310,33 @@ export function BookForm({ book, open, onClose, onSave }: BookFormProps) {
                   <SelectItem value="Yes">Yes</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="tags" className="forest-muted">Tags</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {displayTags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="flex items-center gap-1 fantasy-badge">
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="text-emerald-200/70 hover:text-emerald-50 transition"
+                      aria-label={`Remove tag ${tag}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <Input
+                id="tags"
+                value={tagInput}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a tag and press Enter"
+                className="fantasy-input mt-3"
+              />
             </div>
 
             <div className="flex items-center gap-2 col-span-2">
