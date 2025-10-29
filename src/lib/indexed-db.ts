@@ -122,6 +122,9 @@ export async function loadBooks(): Promise<Book[]> {
   return records.map((entry) => ({
     ...entry,
     author: typeof entry.author === "string" ? entry.author : "",
+    tags: Array.isArray(entry.tags)
+      ? entry.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
+      : [],
   }));
 }
 
