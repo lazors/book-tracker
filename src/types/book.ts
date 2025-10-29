@@ -14,4 +14,5 @@ export interface Book {
   quantity: number;
   forSale: ForSaleStatus;
   soldFor: number | null;
+  tags: string[];
 }

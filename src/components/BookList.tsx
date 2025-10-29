@@ -147,6 +147,19 @@ export function BookList({ books, onEdit, onDelete }: BookListProps) {
               <div className="text-sm">{formatDate(book.estimatedDeliveryDate)}</div>
             </div>
 
+            {Array.isArray(book.tags) && book.tags.length > 0 && (
+              <div>
+                <div className="forest-muted mb-1">Tags:</div>
+                <div className="flex flex-wrap gap-2">
+                  {book.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="forest-badge">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 pt-2">
               <span className="forest-muted">Ordered:</span>
               <Badge variant="outline" className={book.ordered ? 'bg-green-700 border-green-500 text-green-100' : 'bg-slate-700 border-slate-500 text-slate-200'}>
